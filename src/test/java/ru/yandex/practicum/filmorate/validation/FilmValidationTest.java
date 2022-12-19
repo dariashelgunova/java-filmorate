@@ -1,11 +1,11 @@
-package ru.yandex.practicum.filmorate.validationTests;
+package ru.yandex.practicum.filmorate.validation;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.models.Film;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
