@@ -1,62 +1,59 @@
 package ru.yandex.practicum.filmorate.controllers;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.models.Film;
+import ru.yandex.practicum.filmorate.services.FilmService;
+import ru.yandex.practicum.filmorate.storages.FilmStorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-@Slf4j
 @RestController
 @Validated
-@RequestMapping(value = "/films")
+@RequestMapping("/films")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FilmController {
-
-    private final HashMap<Integer, Film> films = new HashMap<>();
-    private Integer idCounter = 0;
+    FilmStorage filmStorage;
+    FilmService filmService;
 
     @GetMapping
     public List<Film> findAll() {
-        log.debug("Пользователи - {}", films);
-
-        return new ArrayList<>(films.values());
+        return filmStorage.findAll();
     }
 
     @PostMapping
     public Film create(@Validated @RequestBody Film film) {
-        log.debug("Объект - {}", film);
-
-        if (film.getId() != null && films.containsKey(film.getId())) {
-            throw new ValidationException("Данный фильм уже присутствует в базе. Попробуйте другой метод.");
-        } else {
-            film.setId(++idCounter);
-            films.put(idCounter, film);
-            return film;
-        }
+        return filmStorage.create(film);
     }
 
     @PutMapping
     public Film update(@Validated @RequestBody Film film) {
-        log.debug("Объект - {}", film);
-
-        if (film.getId() == null) {
-            film.setId(++idCounter);
-            films.put(idCounter, film);
-            return film;
-        } else if (films.containsKey(film.getId())) {
-            Film currentFilm = films.get(film.getId());
-            currentFilm.setName(film.getName());
-            currentFilm.setDescription(film.getDescription());
-            currentFilm.setReleaseDate(film.getReleaseDate());
-            currentFilm.setDuration(film.getDuration());
-            return currentFilm;
-        } else {
-            throw new ValidationException("Произошла ошибка при обработке запроса, попробуйте еще раз.");
-        }
+        return filmStorage.update(film);
     }
 
+    @GetMapping("/{id}")
+    public Film findById(@PathVariable("id") Integer filmId) {
+        return filmStorage.findById(filmId);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable("id") Integer filmId,
+                        @PathVariable("userId") Integer userId) {
+        filmService.addLike(userId, filmId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteLike(@PathVariable("id") Integer filmId,
+                           @PathVariable("userId") Integer userId) {
+        filmService.deleteLike(userId, filmId);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> findBestFilms(@RequestParam(required = false) Integer count) {
+        return filmService.findBestFilms(count);
+    }
 }

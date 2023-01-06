@@ -1,77 +1,75 @@
 package ru.yandex.practicum.filmorate.controllers;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.models.User;
+import ru.yandex.practicum.filmorate.services.UserService;
+import ru.yandex.practicum.filmorate.storages.UserStorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
-@Slf4j
 @RestController
 @Validated
-@RequestMapping(value = "/users")
+@RequestMapping("/users")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
 
-    private final HashMap<Integer, User> users = new HashMap<>();
-    private Integer idCounter = 0;
+    UserStorage userStorage;
+    UserService userService;
 
     @GetMapping
     public List<User> findAll() {
-        log.debug("Пользователи - {}", users);
-
-        return new ArrayList<>(users.values());
+        return userStorage.findAll();
     }
 
     @PostMapping
     public User create(@Validated @RequestBody User user) {
-        log.debug("Объект - {}", user);
-
-        if (user.getId() != null && users.containsKey(user.getId())) {
-            throw new ValidationException("Данный пользователь уже присутствует в базе. Попробуйте другой метод.");
-        } else if (!isEmailNew(user.getEmail())) {
-            throw new ValidationException("Данный адрес электронной почты уже присутствует в базе.");
-        } else {
-            if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
-            user.setId(++idCounter);
-            users.put(idCounter, user);
-            return user;
-        }
+        return userStorage.create(user);
     }
 
     @PutMapping
     public User update(@Validated @RequestBody User user) {
-        log.debug("Объект - {}", user);
-
-        if (user.getId() == null) {
-            create(user);
-            user.setId(++idCounter);
-            users.put(idCounter, user);
-            return user;
-        } else if (users.containsKey(user.getId())) {
-            User currentUser = users.get(user.getId());
-            currentUser.setEmail(user.getEmail());
-            currentUser.setLogin(user.getLogin());
-            currentUser.setName(user.getName());
-            currentUser.setBirthday(user.getBirthday());
-            return currentUser;
-        } else {
-            throw new ValidationException("Произошла ошибка при обработке запроса, попробуйте еще раз.");
-        }
-
+        return userStorage.update(user);
     }
 
-    private boolean isEmailNew (String email) {
-        boolean isNew = true;
-        for (User currentUser : users.values()) {
-            if (currentUser.getEmail().equals(email)) {
-                isNew = false;
-                break;
-            }
-        }
-        return isNew;
+    @GetMapping("/{id}")
+    public User findById(@PathVariable("id") Integer userId) {
+        return userStorage.findById(userId);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void startFriendship(
+            @PathVariable("id") Integer friendInitializerId,
+            @PathVariable("friendId") Integer newFriendId
+    ) {
+        userService.startFriendship(friendInitializerId, newFriendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void endFriendship(
+            @PathVariable("id") Integer friendInitializerId,
+            @PathVariable("friendId") Integer newFriendId
+    ) {
+        userService.endFriendship(friendInitializerId, newFriendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> findFriends(@PathVariable("id") Integer friendInitializerId) {
+        User friendInitializer = userStorage.findById(friendInitializerId);
+
+        return friendInitializer.getFriends();
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Set<User> findCommonFriends(
+            @PathVariable("id") Integer friendInitializerId,
+            @PathVariable("otherId") Integer otherId
+    ) {
+        return userService.findCommonFriends(friendInitializerId, otherId);
     }
 }
