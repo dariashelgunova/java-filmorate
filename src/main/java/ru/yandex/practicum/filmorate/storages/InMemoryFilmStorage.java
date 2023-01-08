@@ -8,15 +8,12 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.models.Film;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
-@Primary
 @Component
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
-    private final HashMap<Integer, Film> films = new HashMap<>();
+    private final Map<Integer, Film> films = new HashMap<>();
     private Integer idCounter = 0;
 
     @Override
@@ -64,10 +61,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         return existingFilm;
     }
 
-    @NotNull
     private Film getByIdOrThrowException(int filmId) {
-        Film film = films.get(filmId);
-        if (film == null) throw new NotFoundObjectException("Объект не был найден!");
-        return film;
+        return Optional.ofNullable(films.get(filmId))
+                .orElseThrow(() -> new NotFoundObjectException("Объект не был найден"));
     }
 }

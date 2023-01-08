@@ -7,8 +7,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.services.FilmService;
-import ru.yandex.practicum.filmorate.storages.FilmStorage;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 @RestController
@@ -17,27 +18,27 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FilmController {
-    FilmStorage filmStorage;
+
     FilmService filmService;
 
     @GetMapping
     public List<Film> findAll() {
-        return filmStorage.findAll();
+        return filmService.findAll();
     }
 
     @PostMapping
-    public Film create(@Validated @RequestBody Film film) {
-        return filmStorage.create(film);
+    public Film create(@Valid @RequestBody Film film) {
+        return filmService.create(film);
     }
 
     @PutMapping
-    public Film update(@Validated @RequestBody Film film) {
-        return filmStorage.update(film);
+    public Film update(@Valid @RequestBody Film film) {
+        return filmService.update(film);
     }
 
     @GetMapping("/{id}")
     public Film findById(@PathVariable("id") Integer filmId) {
-        return filmStorage.findById(filmId);
+        return filmService.findById(filmId);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -53,7 +54,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> findBestFilms(@RequestParam(required = false) Integer count) {
+    public List<Film> findBestFilms(@Positive @RequestParam(defaultValue = "10") Integer count) {
         return filmService.findBestFilms(count);
     }
 }

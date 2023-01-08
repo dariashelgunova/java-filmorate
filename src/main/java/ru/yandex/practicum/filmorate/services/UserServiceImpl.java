@@ -13,12 +13,34 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.apache.logging.log4j.util.Strings.isBlank;
+
 @Primary
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserServiceImpl implements UserService {
     UserStorage userStorage;
+
+    @Override
+    public List<User> findAll() {
+        return userStorage.findAll();
+    }
+
+    @Override
+    public User findById(Integer id) {
+        return userStorage.findById(id);
+    }
+
+    @Override
+    public User create(User user) {
+        return userStorage.create(setNameIfBlankAndGet(user));
+    }
+
+    @Override
+    public User update(User user) {
+        return userStorage.update(user);
+    }
 
     public void startFriendship(int friendInitializerId, int newFriendId) {
         User friendInitializer = userStorage.findById(friendInitializerId);
@@ -60,5 +82,11 @@ public class UserServiceImpl implements UserService {
         return user1Friends.stream()
                 .filter(user2Friends::contains)
                 .collect(Collectors.toSet());
+    }
+
+    private User setNameIfBlankAndGet(User user) {
+        if (isBlank(user.getName()))
+            user.setName(user.getLogin());
+        return user;
     }
 }

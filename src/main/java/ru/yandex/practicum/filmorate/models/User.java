@@ -22,11 +22,11 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
     Integer id;
-    @NotNull(message = "Адрес электронной почты отсутствует. Попробуйте еще раз.")
+    @NotBlank(message = "Адрес электронной почты отсутствует. Попробуйте еще раз.")
     @Email(message = "Необходимо ввести электронную почту в соответствующем формате. Например - name@gmail.com")
     String email;
     @NotBlank(message = "Логин не может быть пустым")
-    @DoesNotContainSpaces(message = "Логин не может содержать пробелы")
+    //@DoesNotContainSpaces(message = "Логин не может содержать пробелы")
     String login;
     String name;
     @PastOrPresent(message = "Дата рождения не может относиться к будущему")

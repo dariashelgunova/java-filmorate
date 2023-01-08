@@ -8,17 +8,14 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.models.User;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static org.apache.logging.log4j.util.Strings.isBlank;
 
-@Primary
 @Component
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
-    private final HashMap<Integer, User> users = new HashMap<>();
+    private final Map<Integer, User> users = new HashMap<>();
     private Integer idCounter = 0;
 
     @Override
@@ -40,11 +37,8 @@ public class InMemoryUserStorage implements UserStorage {
         if (user.getId() != null)
             throw new ValidationException("Id создаваемого пользователя не должен быть задан!");
 
-        if (isEmailAlreadyOccupied(user.getEmail()))
+        if (isEmailAlreadyOccupied(user))
             throw new ValidationException("Данный адрес электронной почты уже присутствует в базе.");
-
-        if (isBlank(user.getName()))
-            user.setName(user.getLogin());
 
         return createNewUser(user);
     }
@@ -58,10 +52,12 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User update(User user) {
         log.debug("Объект - {}", user);
-
         Integer userId = user.getId();
         if (userId == null)
             return create(user);
+
+        if (isEmailAlreadyOccupied(user))
+            throw new ValidationException("Данный адрес электронной почты уже присутствует в базе.");
 
         User existingUser = getUserByIdOrThrowException(userId);
         return updateExistingUser(existingUser, user);
@@ -76,21 +72,22 @@ public class InMemoryUserStorage implements UserStorage {
         return existingUser;
     }
 
-    private boolean isEmailAlreadyOccupied(String email) {
+    private boolean isEmailAlreadyOccupied(User userToCheck) {
+        String userToCheckEmail = userToCheck.getEmail();
         boolean isNew = true;
-        for (User currentUser : users.values()) {
-            if (currentUser.getEmail().equals(email)) {
-                isNew = false;
-                break;
+        if (userToCheck.getId() == null || !users.containsKey(userToCheck.getId())) {
+            for (User currentUser : users.values()) {
+                if (currentUser.getEmail().equals(userToCheckEmail)) {
+                    isNew = false;
+                    break;
+                }
             }
         }
         return !isNew;
     }
 
     private User getUserByIdOrThrowException(int userId) {
-        User user = users.get(userId);
-        if (user == null) throw new NotFoundObjectException("Объект не был найден");
-        return user;
+        return Optional.ofNullable(users.get(userId))
+                .orElseThrow(() -> new NotFoundObjectException("Объект не был найден"));
     }
-
 }

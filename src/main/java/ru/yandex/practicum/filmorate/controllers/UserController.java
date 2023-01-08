@@ -7,8 +7,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.services.UserService;
-import ru.yandex.practicum.filmorate.storages.UserStorage;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Set;
 
@@ -18,28 +18,26 @@ import java.util.Set;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
-
-    UserStorage userStorage;
     UserService userService;
 
     @GetMapping
     public List<User> findAll() {
-        return userStorage.findAll();
+        return userService.findAll();
     }
 
     @PostMapping
-    public User create(@Validated @RequestBody User user) {
-        return userStorage.create(user);
+    public User create(@Valid @RequestBody User user) {
+        return userService.create(user);
     }
 
     @PutMapping
-    public User update(@Validated @RequestBody User user) {
-        return userStorage.update(user);
+    public User update(@Valid @RequestBody User user) {
+        return userService.update(user);
     }
 
     @GetMapping("/{id}")
     public User findById(@PathVariable("id") Integer userId) {
-        return userStorage.findById(userId);
+        return userService.findById(userId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -60,7 +58,7 @@ public class UserController {
 
     @GetMapping("/{id}/friends")
     public List<User> findFriends(@PathVariable("id") Integer friendInitializerId) {
-        User friendInitializer = userStorage.findById(friendInitializerId);
+        User friendInitializer = userService.findById(friendInitializerId);
 
         return friendInitializer.getFriends();
     }
