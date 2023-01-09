@@ -1,30 +1,36 @@
 package ru.yandex.practicum.filmorate.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.springframework.format.annotation.DateTimeFormat;
-import ru.yandex.practicum.filmorate.validation.DoesNotContainSpaces;
-
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(exclude = "friends")
+@ToString(exclude = "friends")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
-
-    private Integer id;
-    @NotNull(message = "Адрес электронной почты отсутствует. Попробуйте еще раз.")
+    Integer id;
+    @NotBlank(message = "Адрес электронной почты отсутствует. Попробуйте еще раз.")
     @Email(message = "Необходимо ввести электронную почту в соответствующем формате. Например - name@gmail.com")
-    private String email;
+    String email;
     @NotBlank(message = "Логин не может быть пустым")
-    @DoesNotContainSpaces(message = "Логин не может содержать пробелы")
-    private String login;
-    private String name;
+    //@DoesNotContainSpaces(message = "Логин не может содержать пробелы")
+    String login;
+    String name;
     @PastOrPresent(message = "Дата рождения не может относиться к будущему")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @JsonFormat(pattern="yyyy-MM-dd")
-    private Date birthday;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    Date birthday;
+    @JsonIgnoreProperties("friends")
+    List<User> friends = new ArrayList<>();
 }
