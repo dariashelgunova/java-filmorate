@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.services;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.UniversalException;
 import ru.yandex.practicum.filmorate.models.User;
@@ -15,7 +14,6 @@ import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.util.Strings.isBlank;
 
-@Primary
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storages;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundObjectException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -10,7 +9,6 @@ import ru.yandex.practicum.filmorate.models.User;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 
-import static org.apache.logging.log4j.util.Strings.isBlank;
 
 @Component
 @Slf4j
@@ -33,9 +31,6 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User create(User user) {
         log.debug("Объект - {}", user);
-
-        if (user.getId() != null)
-            throw new ValidationException("Id создаваемого пользователя не должен быть задан!");
 
         if (isEmailAlreadyOccupied(user))
             throw new ValidationException("Данный адрес электронной почты уже присутствует в базе.");
@@ -75,9 +70,10 @@ public class InMemoryUserStorage implements UserStorage {
     private boolean isEmailAlreadyOccupied(User userToCheck) {
         String userToCheckEmail = userToCheck.getEmail();
         boolean isNew = true;
-        if (userToCheck.getId() == null || !users.containsKey(userToCheck.getId())) {
+        if (userToCheck.getId() == null || users.containsKey(userToCheck.getId())) {
             for (User currentUser : users.values()) {
-                if (currentUser.getEmail().equals(userToCheckEmail)) {
+                if (currentUser.getEmail().equals(userToCheckEmail) &&
+                        !Objects.equals(currentUser.getId(), userToCheck.getId())) {
                     isNew = false;
                     break;
                 }

@@ -1,13 +1,10 @@
 package ru.yandex.practicum.filmorate.storages;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundObjectException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.models.Film;
 
-import javax.validation.constraints.NotNull;
 import java.util.*;
 
 @Component
@@ -31,8 +28,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film create(Film film) {
         log.debug("Объект - {}", film);
-        if (film.getId() != null)
-            throw new ValidationException("Id создаваемого фильма не должен быть задан!");
         return createNewFilm(film);
     }
 
