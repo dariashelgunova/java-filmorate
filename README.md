@@ -1,6 +1,6 @@
 # java-filmorate
 # diagram
-![filmorate_diagram.png](..%2F..%2FDownloads%2Ffilmorate_diagram.png)
+![](src/main/java/ru/yandex/practicum/filmorate/additional/filmorate_diagram.png)
 
 ### Пояснение связей и зависимостей:
 ">" - many-to-one;
