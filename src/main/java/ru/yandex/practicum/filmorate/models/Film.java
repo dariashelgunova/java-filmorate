@@ -35,7 +35,7 @@ public class Film {
     String description;
     @ReleaseDate
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "Europe/Moscow")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "UTC")
     @NotNull
     Date releaseDate;
     @Positive(message = "Длительность фильма не может быть отрицательной")

@@ -30,7 +30,7 @@ public class User {
     String name;
     @PastOrPresent(message = "Дата рождения не может относиться к будущему")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "Europe/Moscow")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "UTC")
     Date birthday;
     @JsonIgnoreProperties("friends")
     List<User> friends = new ArrayList<>();
