@@ -18,19 +18,21 @@ import java.util.List;
 @EqualsAndHashCode(exclude = "friends")
 @ToString(exclude = "friends")
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
     Integer id;
     @NotBlank(message = "Адрес электронной почты отсутствует. Попробуйте еще раз.")
     @Email(message = "Необходимо ввести электронную почту в соответствующем формате. Например - name@gmail.com")
     String email;
     @NotBlank(message = "Логин не может быть пустым")
-    //@DoesNotContainSpaces(message = "Логин не может содержать пробелы")
     String login;
     String name;
     @PastOrPresent(message = "Дата рождения не может относиться к будущему")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "Europe/Moscow")
     Date birthday;
     @JsonIgnoreProperties("friends")
     List<User> friends = new ArrayList<>();
+
 }

@@ -1,10 +1,10 @@
-package ru.yandex.practicum.filmorate.storages;
+package ru.yandex.practicum.filmorate.storages.inmemory;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundObjectException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.models.User;
+import ru.yandex.practicum.filmorate.storages.UserStorage;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
@@ -23,18 +23,14 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User findById(Integer id) {
+    public Optional<User> findById(Integer id) {
         log.debug("Id пользователя - {}", id);
-        return getUserByIdOrThrowException(id);
+        return Optional.ofNullable(users.get(id));
     }
 
     @Override
     public User create(User user) {
         log.debug("Объект - {}", user);
-
-        if (isEmailAlreadyOccupied(user))
-            throw new ValidationException("Данный адрес электронной почты уже присутствует в базе.");
-
         return createNewUser(user);
     }
 
@@ -51,10 +47,10 @@ public class InMemoryUserStorage implements UserStorage {
         if (userId == null)
             return create(user);
 
-        if (isEmailAlreadyOccupied(user))
-            throw new ValidationException("Данный адрес электронной почты уже присутствует в базе.");
+        User existingUser = users.get(userId);
+        if (existingUser == null)
+            throw new NotFoundObjectException("Объект не был найден");
 
-        User existingUser = getUserByIdOrThrowException(userId);
         return updateExistingUser(existingUser, user);
     }
 
@@ -64,26 +60,7 @@ public class InMemoryUserStorage implements UserStorage {
         existingUser.setLogin(userToUpdate.getLogin());
         existingUser.setName(userToUpdate.getName());
         existingUser.setBirthday(userToUpdate.getBirthday());
+        existingUser.setFriends(userToUpdate.getFriends());
         return existingUser;
-    }
-
-    private boolean isEmailAlreadyOccupied(User userToCheck) {
-        String userToCheckEmail = userToCheck.getEmail();
-        boolean isNew = true;
-        if (userToCheck.getId() == null || users.containsKey(userToCheck.getId())) {
-            for (User currentUser : users.values()) {
-                if (currentUser.getEmail().equals(userToCheckEmail) &&
-                        !Objects.equals(currentUser.getId(), userToCheck.getId())) {
-                    isNew = false;
-                    break;
-                }
-            }
-        }
-        return !isNew;
-    }
-
-    private User getUserByIdOrThrowException(int userId) {
-        return Optional.ofNullable(users.get(userId))
-                .orElseThrow(() -> new NotFoundObjectException("Объект не был найден"));
     }
 }

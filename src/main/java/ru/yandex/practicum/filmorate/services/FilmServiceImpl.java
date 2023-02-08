@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.services;
 
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundObjectException;
 import ru.yandex.practicum.filmorate.exceptions.UniversalException;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
@@ -17,10 +19,15 @@ import java.util.stream.Collectors;
 import static java.util.Comparator.comparingInt;
 
 @Service
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class FilmServiceImpl implements FilmService {
+
+    @Autowired
+    @Qualifier("filmDbStorage")
     FilmStorage filmStorage;
+
+    @Autowired
+    @Qualifier("userDbStorage")
     UserStorage userStorage;
     public static final Comparator<Film> COMPARE_BY_LIKES =
             comparingInt((Film f) -> f.getLikes().size()).reversed();
@@ -32,7 +39,7 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film findById(Integer id) {
-        return filmStorage.findById(id);
+        return getByIdOrThrowException(id);
     }
 
     @Override
@@ -47,24 +54,28 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public void addLike(int userId, int filmId) {
-        User user = userStorage.findById(userId);
-        Film film = filmStorage.findById(filmId);
+        User user = userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundObjectException("Объект не был найден"));
+        Film film = getByIdOrThrowException(filmId);
 
-        if (film.getLikes().contains(user))
+        if (film.getLikes().contains(user.getId()))
             throw new UniversalException("Данный пользователь уже поставил лайк этому фильму!");
 
-        film.getLikes().add(user);
+        film.getLikes().add(user.getId());
+        filmStorage.update(film);
     }
 
     @Override
     public void deleteLike(int userId, int filmId) {
-        User user = userStorage.findById(userId);
-        Film film = filmStorage.findById(filmId);
+        User user = userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundObjectException("Объект не был найден"));
+        Film film = getByIdOrThrowException(filmId);
 
-        if (!film.getLikes().contains(user))
+        if (!film.getLikes().contains(user.getId()))
             throw new UniversalException("Данный пользователь не поставил лайк этому фильму!");
 
-        film.getLikes().remove(user);
+        film.getLikes().remove(user.getId());
+        filmStorage.update(film);
     }
 
     @Override
@@ -73,5 +84,10 @@ public class FilmServiceImpl implements FilmService {
                 .sorted(COMPARE_BY_LIKES)
                 .limit(bestFilms)
                 .collect(Collectors.toList());
+    }
+
+    private Film getByIdOrThrowException(int filmId) {
+        return filmStorage.findById(filmId)
+                .orElseThrow(() -> new NotFoundObjectException("Объект не был найден"));
     }
 }

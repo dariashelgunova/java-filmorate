@@ -14,7 +14,8 @@ import javax.validation.ValidatorFactory;
 import java.util.Date;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserValidationTest {

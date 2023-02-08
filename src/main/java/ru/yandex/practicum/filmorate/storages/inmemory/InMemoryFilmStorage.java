@@ -1,9 +1,10 @@
-package ru.yandex.practicum.filmorate.storages;
+package ru.yandex.practicum.filmorate.storages.inmemory;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundObjectException;
 import ru.yandex.practicum.filmorate.models.Film;
+import ru.yandex.practicum.filmorate.storages.FilmStorage;
 
 import java.util.*;
 
@@ -20,9 +21,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film findById(Integer id) {
+    public Optional<Film> findById(Integer id) {
         log.debug("Id  Фильма - {}", id);
-        return getByIdOrThrowException(id);
+        return Optional.ofNullable(films.get(id));
     }
 
     @Override
@@ -44,7 +45,10 @@ public class InMemoryFilmStorage implements FilmStorage {
         Integer filmId = film.getId();
         if (filmId == null) return create(film);
 
-        Film existingFilm = getByIdOrThrowException(filmId);
+        Film existingFilm = films.get(filmId);
+        if (existingFilm == null) {
+            throw new NotFoundObjectException("Объект не был найден");
+        }
         return updateExistingFilm(existingFilm, film);
     }
 
@@ -53,11 +57,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         existingFilm.setDescription(filmToUpdate.getDescription());
         existingFilm.setReleaseDate(filmToUpdate.getReleaseDate());
         existingFilm.setDuration(filmToUpdate.getDuration());
+        existingFilm.setGenres(filmToUpdate.getGenres());
+        existingFilm.setRate(filmToUpdate.getRate());
         return existingFilm;
-    }
-
-    private Film getByIdOrThrowException(int filmId) {
-        return Optional.ofNullable(films.get(filmId))
-                .orElseThrow(() -> new NotFoundObjectException("Объект не был найден"));
     }
 }
