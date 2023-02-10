@@ -45,9 +45,9 @@ public class TestTools {
 
     public void createFilm1() {
         LocalDate releaseDate = LocalDate.of(2005, 10, 15);
-        //Genre genre = new Genre(1, "Комедия");
+        Genre genre = new Genre(1, "Комедия");
         Set<Genre> genres = new TreeSet<>();
-        //genres.add(genre);
+        genres.add(genre);
         Mpa mpa = new Mpa(1, "G", "У фильма нет возрастных ограничений");
         Film film = filmDAOImpl.create(new Film(null, "new film", "film about zombies",
                 releaseDate, 120, 4, genres, mpa));
