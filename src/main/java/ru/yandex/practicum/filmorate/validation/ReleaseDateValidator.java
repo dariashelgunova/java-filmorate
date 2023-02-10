@@ -4,17 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Slf4j
-public class ReleaseDateValidator implements ConstraintValidator<ReleaseDate, Date> {
+public class ReleaseDateValidator implements ConstraintValidator<ReleaseDate, LocalDate> {
 
-    private final static Date EARLIEST_RELEASE_DATE = new Date(-2335573817000L);
+    private final static LocalDate EARLIEST_RELEASE_DATE = LocalDate.of(1895, 12,25);
 
     @Override
-    public boolean isValid(Date date, ConstraintValidatorContext cxt) {
-        Date comparedDate = EARLIEST_RELEASE_DATE;
-        return date.after(EARLIEST_RELEASE_DATE);
+    public boolean isValid(LocalDate date, ConstraintValidatorContext cxt) {
+        return date.isAfter(EARLIEST_RELEASE_DATE);
     }
-
 }

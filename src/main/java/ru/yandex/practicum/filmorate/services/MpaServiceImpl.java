@@ -1,33 +1,28 @@
 package ru.yandex.practicum.filmorate.services;
 
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundObjectException;
 import ru.yandex.practicum.filmorate.models.Mpa;
-import ru.yandex.practicum.filmorate.storages.MpaStorage;
+import ru.yandex.practicum.filmorate.repos.MpaRepository;
 
 import java.util.List;
 
 @Service
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class MpaServiceImpl implements MpaService {
-    @Autowired
-    MpaStorage mpaStorage;
+    MpaRepository mpaRepository;
 
     @Override
     public List<Mpa> findAll() {
-        return mpaStorage.findAll();
+        return mpaRepository.findAll();
     }
 
     @Override
     public Mpa findById(Integer id) {
-        return getByIdOrThrowException(id);
+        return mpaRepository.findById(id);
     }
 
-    private Mpa getByIdOrThrowException(int mpaId) {
-        return mpaStorage.findById(mpaId)
-                .orElseThrow(() -> new NotFoundObjectException("Объект не был найден"));
-    }
 }

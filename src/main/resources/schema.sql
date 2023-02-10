@@ -6,6 +6,11 @@ CREATE TABLE IF NOT EXISTS users (
         birthday DATE
 );
 
+create unique index if not exists USER_EMAIL_UINDEX on users (email);
+create unique index if not exists USER_LOGIN_UINDEX on USERS (login);
+
+
+
 CREATE TABLE IF NOT EXISTS friendship (
         friend1_id INTEGER REFERENCES users (id),
         friend2_id INTEGER REFERENCES users (id),
@@ -24,7 +29,7 @@ CREATE TABLE IF NOT EXISTS film (
         description VARCHAR(200) NOT NULL,
         release_date DATE,
         duration INTEGER,
-        rate INTEGER,
+        rate INTEGER default 0,
         mpa_id INTEGER REFERENCES mpa (id)
 );
 

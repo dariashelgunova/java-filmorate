@@ -11,10 +11,11 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FilmValidationTest {
@@ -38,7 +39,7 @@ public class FilmValidationTest {
         Film film = new Film();
         film.setName("");
         film.setDescription("description");
-        film.setReleaseDate(new Date(-737434800000L));
+        film.setReleaseDate(LocalDate.of(2005, 10, 16));
         film.setDuration(55);
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
@@ -55,7 +56,7 @@ public class FilmValidationTest {
         film.setDescription("descriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescription" +
                 "descriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescription" +
                 "descriptiondescriptiondescriptiondescription" );
-        film.setReleaseDate(new Date(-737434800000L));
+        film.setReleaseDate(LocalDate.of(2005, 10, 16));
         film.setDuration(55);
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
@@ -69,7 +70,7 @@ public class FilmValidationTest {
         Film film = new Film();
         film.setName("Name");
         film.setDescription("description");
-        film.setReleaseDate(new Date(-5352575417000L));
+        film.setReleaseDate(LocalDate.of(1700, 10, 16));
         film.setDuration(55);
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
@@ -83,7 +84,7 @@ public class FilmValidationTest {
         Film film = new Film();
         film.setName("name");
         film.setDescription("description");
-        film.setReleaseDate(new Date(-737434800000L));
+        film.setReleaseDate(LocalDate.of(2005, 10, 16));
         film.setDuration(-55);
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);

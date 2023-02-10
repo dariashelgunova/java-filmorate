@@ -1,14 +1,14 @@
 package ru.yandex.practicum.filmorate.models;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import static java.lang.Integer.compare;
 
-@Data
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(exclude = "name")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
