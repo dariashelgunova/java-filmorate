@@ -46,15 +46,11 @@ public class FriendshipDAOImpl implements FriendshipDAO {
 
     public List<User> findCommonFriendsByUsersIds(int user1Id, int user2Id) {
         String findUserFriendsSql =
-                "select u.* " +
-                "from (" +
-                        "SELECT f.friend2_id from friendship f WHERE f.friend1_id = ? " +
-                        "INTERSECT " +
-                        "SELECT f.friend2_id from friendship f WHERE f.friend1_id = ?" +
-                ") res " +
-                "LEFT join users u on res.friend2_id = u.id;";
+                "select * from users u, friendship f, friendship o " +
+                "where u.id = f.friend2_id " +
+                "AND u.id = o.friend2_id " +
+                "AND f.friend1_id = ? " +
+                "AND o.friend1_id = ?";
          return jdbcTemplate.query(findUserFriendsSql, userFieldsRowMapper, user1Id, user2Id);
-
     }
-
 }

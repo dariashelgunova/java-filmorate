@@ -33,11 +33,7 @@ public class FilmDAOImpl implements FilmDAO {
 
     @Override
     public Optional<Film> findById(Integer id) {
-        Optional<Film> filmById = findFilmFieldsById(id);
-        if (filmById.isEmpty()) return Optional.empty();
-
-        Film film = filmById.get();
-        return Optional.of(film);
+        return findFilmFieldsById(id);
     }
 
     private Optional<Film> findFilmFieldsById(Integer id) {
@@ -51,7 +47,6 @@ public class FilmDAOImpl implements FilmDAO {
         return Optional.of(result.get(0));
     }
 
-
     @Override
     public List<Film> findAll() {
         String findAllFilmsIdsSql =
@@ -61,6 +56,17 @@ public class FilmDAOImpl implements FilmDAO {
                 "order by f.id, f.rate desc ";
         return jdbcTemplate.query(findAllFilmsIdsSql, filmFieldsRowMapper);
     }
+    @Override
+    public List<Film> findBestFilms(int count) {
+        String findAllFilmsIdsSql =
+              "select * " +
+              "from film as f " +
+              "left join mpa as m on f.mpa_id = m.id " +
+              "order by f.rate desc " +
+              "limit ? ";
+        return jdbcTemplate.query(findAllFilmsIdsSql, filmFieldsRowMapper, count);
+    }
+
     @Override
     public Film create(Film film) {
         int generatedId = insertNewFilm(film);
@@ -88,8 +94,6 @@ public class FilmDAOImpl implements FilmDAO {
 
         return requireNonNull(keyHolder.getKey()).intValue();
     }
-
-
 
     @Override
     public Film update(Film film) {

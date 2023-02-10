@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MpaDAO {
-
     Optional<Mpa> findById(Integer Id);
     List<Mpa> findAll();
     Optional<Mpa> findMpaByFilmId(Integer filmId);

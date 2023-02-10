@@ -7,5 +7,4 @@ import java.util.List;
 public interface GenreService {
     List<Genre> findAll();
     Genre findById(Integer id);
-
 }

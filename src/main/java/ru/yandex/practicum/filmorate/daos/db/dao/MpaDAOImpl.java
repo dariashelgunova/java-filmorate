@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.daos.MpaDAO;
 import ru.yandex.practicum.filmorate.daos.db.rowmappers.MpaRowMapper;
 import ru.yandex.practicum.filmorate.models.Mpa;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,18 +34,9 @@ public class MpaDAOImpl implements MpaDAO {
     @Override
     public List<Mpa> findAll() {
         String findAllGenreIdsSql =
-                "select id " +
+                "select * " +
                 "from mpa" ;
-        List<Integer> allMpaIds = jdbcTemplate.queryForList(findAllGenreIdsSql, Integer.class);
-        List<Mpa> allMpas = new ArrayList<>();
-
-        for (Integer id : allMpaIds) {
-            Optional<Mpa> byId = findById(id);
-            if (byId.isEmpty())
-                throw new RuntimeException("Возникла внутренняя ошибка...");
-            allMpas.add(byId.get());
-        }
-        return allMpas;
+        return jdbcTemplate.query(findAllGenreIdsSql, mpaRowMapper);
     }
 
     @Override

@@ -59,43 +59,19 @@ public class GenreDAOImpl implements GenreDAO {
     }
 
     public void updateFilmGenres(Film existingFilm, Film updatedFilm) {
-        Set<Genre> existingGenres = existingFilm.getGenres();
         Set<Genre> updatedGenres = updatedFilm.getGenres();
 
-        Set<Genre> addedGenres = new HashSet<>(updatedGenres);
-        addedGenres.removeAll(existingGenres);
-
-        Set<Genre> removedGenres = new HashSet<>(existingGenres);
-        removedGenres.removeAll(updatedGenres);
-
         Integer filmId = existingFilm.getId();
-        addGenresToFilm(addedGenres, filmId);
-        removeGenresFromFilm(removedGenres, filmId);
+        removeGenresFromFilm(filmId);
+        addGenresToFilm(updatedGenres, filmId);
     }
 
-    public void removeGenresFromFilm(Collection<Genre> genres, Integer filmId) {
-        if (genres == null) return;
-        List<Genre> genresList = new ArrayList<>(genres);
-
+    public void removeGenresFromFilm(Integer filmId) {
         String addGenresSql =
                 "delete from film_genre " +
-                "where film_id = ? " +
-                "  and genre_id = ?";
+                "where film_id = ? ";
 
-        jdbcTemplate.batchUpdate(addGenresSql,
-                new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        ps.setInt(1, filmId);
-                        ps.setInt(2, genresList.get(i).getId());
-                    }
-
-                    @Override
-                    public int getBatchSize() {
-                        return genres.size();
-                    }
-                }
-        );
+        jdbcTemplate.update(addGenresSql, filmId);
     }
 
     public void addGenresToFilm(Collection<Genre> genres, Integer filmId) {
@@ -120,5 +96,27 @@ public class GenreDAOImpl implements GenreDAO {
                     }
                 }
         );
+    }
+
+    @Override
+    public void load(List<Film> films) {
+        if (films == null || films.isEmpty()) return;
+
+        Map<Integer, Set<Genre>> genresByFilmId = new HashMap<>();
+
+        String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
+        final String sqlQuery =
+                "select fg.film_id, g.* " +
+                "from film_genre fg " +
+                "  left join genre g on fg.genre_id = g.id " +
+                "where fg.film_id in (" + inSql + ")";
+        jdbcTemplate.query(sqlQuery, rs -> {
+            int filmId = rs.getInt(1);
+            int genreId = rs.getInt(2);
+            String genreName = rs.getString(3);
+            genresByFilmId.computeIfAbsent(filmId, k -> new LinkedHashSet<>()).add(new Genre(genreId, genreName));
+        }, films.stream().map(Film::getId).toArray());
+
+        films.forEach(f -> f.setGenres(genresByFilmId.getOrDefault(f.getId(), new LinkedHashSet<>())));
     }
 }

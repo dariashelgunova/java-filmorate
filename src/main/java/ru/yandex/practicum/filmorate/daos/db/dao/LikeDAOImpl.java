@@ -53,8 +53,7 @@ public class LikeDAOImpl implements LikeDAO {
         return jdbcTemplate.queryForList(likesByUserSql, Integer.class, filmId);
     }
 
-    @Override
-    public void updateRate(int filmId) {
+    private void updateRate(int filmId) {
         String sqlQuery =
                 "update FILM f set rate = (select count(l.user_id) " +
                 "from LIKES l where l.film_id = f.id)  " +

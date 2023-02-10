@@ -17,8 +17,6 @@ import ru.yandex.practicum.filmorate.models.User;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,11 +33,7 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public Optional<User> findById(Integer id) {
-        Optional<User> userById = findUserFieldsById(id);
-        if (userById.isEmpty()) return Optional.empty();
-
-        User user = userById.get();
-        return Optional.of(user);
+        return findUserFieldsById(id);
     }
 
     private Optional<User> findUserFieldsById(Integer id) {
@@ -55,19 +49,10 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public List<User> findAll() {
         String findAllUsersIdsSql =
-                "select id " +
-                "from users";
-        List<Integer> allUsersIds = jdbcTemplate.queryForList(findAllUsersIdsSql, Integer.class);
-        List<User> allUsers = new ArrayList<>();
-
-        for (Integer userId : allUsersIds) {
-            Optional<User> byId = findById(userId);
-            if (byId.isEmpty())
-                throw new RuntimeException("Возникла внутренняя ошибка...");
-            allUsers.add(byId.get());
-        }
-        allUsers.sort(Comparator.comparingInt(User::getId));
-        return allUsers;
+                "select * " +
+                "from users " +
+                "order by id";
+        return jdbcTemplate.query(findAllUsersIdsSql, userFieldsRowMapper);
     }
 
     @Override
@@ -82,7 +67,6 @@ public class UserDAOImpl implements UserDAO {
         String createUserSql =
                 "insert into users (email, login, name, birthday) " +
                         "values (?, ?, ?, ?) ";
-
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         PreparedStatementCreator preparedStatementCreator = connection -> {

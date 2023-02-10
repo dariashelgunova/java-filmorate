@@ -9,8 +9,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.TestTools;
+import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Genre;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -62,4 +64,5 @@ class GenreDAOImplTest {
 
         assertEquals(singleton(new Genre(1, "Комедия")), actual);
     }
+
 }

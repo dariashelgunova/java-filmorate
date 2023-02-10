@@ -15,7 +15,6 @@ import static java.lang.Integer.compare;
 public class Genre implements Comparable<Genre> {
     Integer id;
     String name;
-
     @Override
     public int compareTo(Genre o) {
         return compare(this.id, o.getId());

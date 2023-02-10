@@ -10,4 +10,5 @@ public interface FilmDAO {
     List<Film> findAll();
     Film create(Film film);
     Film update(Film film);
+    List<Film> findBestFilms(int count);
 }
