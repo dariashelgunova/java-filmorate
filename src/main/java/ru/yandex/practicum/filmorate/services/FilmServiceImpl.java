@@ -3,75 +3,100 @@ package ru.yandex.practicum.filmorate.services;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.daos.FilmDAO;
+import ru.yandex.practicum.filmorate.daos.GenreDAO;
+import ru.yandex.practicum.filmorate.daos.UserDAO;
+import ru.yandex.practicum.filmorate.daos.db.dao.LikeDAOImpl;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundObjectException;
 import ru.yandex.practicum.filmorate.exceptions.UniversalException;
 import ru.yandex.practicum.filmorate.models.Film;
-import ru.yandex.practicum.filmorate.models.User;
-import ru.yandex.practicum.filmorate.storages.FilmStorage;
-import ru.yandex.practicum.filmorate.storages.UserStorage;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static java.util.Comparator.comparingInt;
-
-@Service
+@Repository
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class FilmServiceImpl implements FilmService {
-    FilmStorage filmStorage;
-    UserStorage userStorage;
-    public static final Comparator<Film> COMPARE_BY_LIKES =
-            comparingInt((Film f) -> f.getLikes().size()).reversed();
+    FilmDAO filmStorage;
+    UserDAO userDAO;
+    LikeDAOImpl likeDAOImpl;
+    GenreDAO genreDAO;
 
     @Override
     public List<Film> findAll() {
-        return filmStorage.findAll();
+        List<Film> all = filmStorage.findAll();
+        genreDAO.load(all);
+        return all;
     }
 
     @Override
     public Film findById(Integer id) {
-        return filmStorage.findById(id);
+        Film film = getFilmByIdOrElseThrowException(id);
+        genreDAO.load(List.of(film));
+        return film;
     }
 
     @Override
     public Film create(Film film) {
-        return filmStorage.create(film);
+        Film created = filmStorage.create(film);
+
+        genreDAO.addGenresToFilm(film.getGenres(), created.getId());
+
+        genreDAO.load(List.of(created)); //fillFilmGenresFor(created);
+        return created;
     }
 
     @Override
     public Film update(Film film) {
-        return filmStorage.update(film);
+        Film updated = filmStorage.update(film);
+        genreDAO.load(List.of(updated)); //fillFilmGenresFor(updated);
+        genreDAO.updateFilmGenres(updated, film);
+        Film fromDb = getFilmByIdOrElseThrowException(film.getId());
+        genreDAO.load(List.of(fromDb)); //fillFilmGenresFor(fromDb);
+        return fromDb;
     }
 
     @Override
     public void addLike(int userId, int filmId) {
-        User user = userStorage.findById(userId);
-        Film film = filmStorage.findById(filmId);
+        checkThatUserIsPresent(userId);
+        getFilmByIdOrElseThrowException(filmId);
 
-        if (film.getLikes().contains(user))
+        List<Integer> likedFilmsIds = likeDAOImpl.findLikedFilmsByUser(userId);
+
+        if (likedFilmsIds.contains(filmId))
             throw new UniversalException("Данный пользователь уже поставил лайк этому фильму!");
 
-        film.getLikes().add(user);
+        likeDAOImpl.addLike(userId, filmId);
     }
 
     @Override
     public void deleteLike(int userId, int filmId) {
-        User user = userStorage.findById(userId);
-        Film film = filmStorage.findById(filmId);
+        checkThatUserIsPresent(userId);
+        getFilmByIdOrElseThrowException(filmId);
 
-        if (!film.getLikes().contains(user))
+        List<Integer> likedFilmsIds = likeDAOImpl.findLikedFilmsByUser(userId);
+
+        if (!likedFilmsIds.contains(filmId))
             throw new UniversalException("Данный пользователь не поставил лайк этому фильму!");
 
-        film.getLikes().remove(user);
+        likeDAOImpl.deleteLike(userId, filmId);
     }
 
     @Override
     public List<Film> findBestFilms(int bestFilms) {
-        return filmStorage.findAll().stream()
-                .sorted(COMPARE_BY_LIKES)
-                .limit(bestFilms)
-                .collect(Collectors.toList());
+        List<Film> films = filmStorage.findBestFilms(bestFilms);
+        genreDAO.load(films);
+        return films;
+    }
+
+    private Film getFilmByIdOrElseThrowException(int filmId) {
+        return filmStorage.findById(filmId)
+                .orElseThrow(() -> new NotFoundObjectException("Объект не был найден"));
+    }
+
+    private void checkThatUserIsPresent(int userId) {
+        userDAO.findById(userId)
+                .orElseThrow(() -> new NotFoundObjectException("Объект не был найден"));
     }
 }

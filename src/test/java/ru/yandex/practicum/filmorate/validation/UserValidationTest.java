@@ -11,10 +11,11 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserValidationTest {
@@ -36,7 +37,7 @@ public class UserValidationTest {
     @Test
     public void testUserWithWrongEmail() {
         User user = new User();
-        user.setBirthday(new Date(-737434800000L));
+        user.setBirthday(LocalDate.of(2005, 10, 16));
         user.setEmail("mailmail.ru");
         user.setName("Nick Name");
         user.setLogin("Dolore");
@@ -55,7 +56,7 @@ public class UserValidationTest {
     @Test
     public void testUserWithEmptyLogin() {
         User user = new User();
-        user.setBirthday(new Date(-737434800000L));
+        user.setBirthday(LocalDate.of(2005, 10, 16));
         user.setEmail("mail@mail.ru");
         user.setName("Nick Name");
         user.setLogin("");
@@ -73,7 +74,7 @@ public class UserValidationTest {
     @Test
     public void testUserWithWrongBirthday() {
         User user = new User();
-        user.setBirthday(new Date(1747774800000L));
+        user.setBirthday(LocalDate.of(3000, 10, 16));
         user.setEmail("mail@mail.ru");
         user.setName("Nick Name");
         user.setLogin("dolore");
