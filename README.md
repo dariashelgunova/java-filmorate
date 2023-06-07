@@ -1,36 +1,11 @@
-# java-filmorate
-# diagram
+# Filmorate
 
-![](src/main/java/ru/yandex/practicum/filmorate/additional/diagram.png)
+**Filmorate** - это сервис для поиска фильмов
 
- ### Данная диаграмма представляет собой визуальное отражение базы данных, которая была создана для хранения информации самого приложения. 
+## Что будет делать продукт?
 
-
-### Примеры запросов:
-1.
-```
-SELECT FS.friend2_id
-
-FROM friendship as FS
-
-WHERE friend1_id = 1
-
-GROUP BY FS.friend2_id;
-```
-
-2.
-```
-SELECT L.user_id
-
-FROM likes as L
-
-WHERE film_id = 3
-
-GROUP BY L.user_id
-
-ORDER BY L.user_id DESC;
-```
-
-### Также прикрепляю отзыв моего одногруппника на мою диаграмму, после комментария внесла изменения
-
-![](src/main/java/ru/yandex/practicum/filmorate/additional/review.png)
+- CRUD операции с пользователями и фильмами
+- Хранение в базе данных
+- Валидация входящих данных
+- Возможность добавлять жанры и рейтинги
+- Возможность оценивать фильмы и на основе оценки выводить лучшие фильмы
